@@ -3,6 +3,7 @@ package com.wildcodeschool.wildandwizard.controller;
 import com.wildcodeschool.wildandwizard.entity.Wizard;
 import com.wildcodeschool.wildandwizard.repository.WizardDao;
 import com.wildcodeschool.wildandwizard.repository.WizardRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,15 +14,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class WizardController {
 
-    private final WizardDao wizardDao;
+    private final WizardDao repository;
 
-    public WizardController(WizardDao wizardDao) {
-        this.wizardDao = wizardDao;
+    public WizardController(
+            @Qualifier("wizardRepository") WizardDao repositoryInjected
+    ) {
+        this.repository = repositoryInjected;
     }
 
     @GetMapping("/wizards")
     public String getAll(Model model) {
-        model.addAttribute("wizards", wizardDao.findAll());
+        model.addAttribute("wizards",repository.findAll());
         return "wizards";
     }
 
@@ -32,7 +35,7 @@ public class WizardController {
 
         Wizard wizard = new Wizard();
         if (id != null) {
-            wizard =  wizardDao.findById(id);
+            wizard =  repository.findById(id);
         }
         model.addAttribute("wizard", wizard);
 
@@ -43,9 +46,9 @@ public class WizardController {
     public String postWizard(@ModelAttribute Wizard wizard) {
 
         if (wizard.getId() != null) {
-            wizardDao.update(wizard);
+            repository.update(wizard);
         } else {
-            wizardDao.save(wizard);
+            repository.save(wizard);
         }
         return "redirect:/wizards";
     }
@@ -53,7 +56,7 @@ public class WizardController {
     @GetMapping("/wizard/delete")
     public String deleteWizard(@RequestParam Long id) {
 
-        wizardDao.deleteById(id);
+        repository.deleteById(id);
 
         return "redirect:/wizards";
     }
